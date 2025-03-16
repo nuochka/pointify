@@ -10,12 +10,7 @@ import SwiftUI
 
 struct RegisterView: View {
     
-    @State private var name: String = ""
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var confirmPassword: String = ""
-    @State private var isSecure: Bool = true
-    @State private var isSecureConfirm: Bool = true
+    @StateObject private var viewModel = RegisterViewModel()
     
     var body: some View {
         VStack {
@@ -40,7 +35,7 @@ struct RegisterView: View {
                 HStack {
                     Image(systemName: "person")
                         .foregroundColor(.gray)
-                    TextField("Name", text: $name)
+                    TextField("Name", text: $viewModel.name)
                         .disableAutocorrection(true)
                 }
                 .padding()
@@ -50,7 +45,7 @@ struct RegisterView: View {
                 HStack {
                     Image(systemName: "envelope")
                         .foregroundColor(.gray)
-                    TextField("Email", text: $email)
+                    TextField("Email", text: $viewModel.email)
                         .disableAutocorrection(true)
                 }
                 .padding()
@@ -60,17 +55,8 @@ struct RegisterView: View {
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
-                    if isSecure {
-                        SecureField("Password", text: $password)
-                    } else {
-                        TextField("Password", text: $password)
-                    }
-                    Button(action: {
-                        isSecure.toggle()
-                    }) {
-                        Image(systemName: isSecure ? "eye.slash" : "eye")
-                            .foregroundColor(.gray)
-                    }
+                    SecureField("Password", text: $viewModel.password)
+                        .disableAutocorrection(true)
                 }
                 .padding()
                 .background(Color.gray.brightness(0.4))
@@ -79,23 +65,15 @@ struct RegisterView: View {
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
-                    if isSecureConfirm {
-                        SecureField("Confirm Password", text: $confirmPassword)
-                    } else {
-                        TextField("Confirm Password", text: $confirmPassword)
-                    }
-                    Button(action: {
-                        isSecureConfirm.toggle()
-                    }) {
-                        Image(systemName: isSecureConfirm ? "eye.slash" : "eye")
-                            .foregroundColor(.gray)
-                    }
+                    SecureField("Confirm Password", text: $viewModel.confirmPassword)
+                        .disableAutocorrection(true)
                 }
                 .padding()
                 .background(Color.gray.brightness(0.4))
                 .cornerRadius(12)
                 
                 Button(action: {
+                    viewModel.registerUser()
                 }) {
                     Text("Sign Up")
                         .fontWeight(.semibold)
@@ -106,6 +84,12 @@ struct RegisterView: View {
                         .cornerRadius(12)
                 }
                 .padding(.top, 10)
+                
+                if !viewModel.message.isEmpty {
+                    Text(viewModel.message)
+                        .foregroundColor(.red)
+                        .padding(.top, 10)
+                }
                 
                 HStack {
                     Text("Already have an account?")
@@ -131,3 +115,4 @@ struct RegisterView: View {
         RegisterView()
     }
 }
+
