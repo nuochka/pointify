@@ -82,7 +82,7 @@ struct LoginView: View {
                 HStack{
                     Text("Do not have an account yet?")
                         .foregroundColor(Color.gray)
-                    NavigationLink(destination: ContentView()){
+                    NavigationLink(destination: RegisterView()){
                         Text("Sign Up")
                             .fontWeight(.semibold)
                             .foregroundColor(Color.gray)
