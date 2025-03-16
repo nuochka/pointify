@@ -1,23 +1,29 @@
-import NIOSSL
+import Vapor
 import Fluent
 import FluentPostgresDriver
-import Vapor
+import SwiftDotenv
 
-// configures your application
 public func configure(_ app: Application) async throws {
-    // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    try Dotenv.configure()
 
-    app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
-        hostname: Environment.get("DATABASE_HOST") ?? "localhost",
-        port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
-        username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
-        password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
-        database: Environment.get("DATABASE_NAME") ?? "vapor_database",
-        tls: .prefer(try .init(configuration: .clientDefault)))
-    ), as: .psql)
+    let hostname = Environment.get("DATABASE_HOST") ?? "localhost"
+    let port = Environment.get("DATABASE_PORT").flatMap { Int($0) } ?? 5432
+    let username = Environment.get("DATABASE_USERNAME") ?? "your_username"
+    let password = Environment.get("DATABASE_PASSWORD") ?? "your_password"
+    let database = Environment.get("DATABASE_NAME") ?? "your_database_name"
 
-    app.migrations.add(CreateTodo())
-    // register routes
+    let config = SQLPostgresConfiguration(
+        hostname: hostname,
+        port: port,
+        username: username,
+        password: password,
+        database: database,
+        tls: .prefer(try .init(configuration: .clientDefault))
+    )
+
+    app.databases.use(.postgres(configuration: config), as: .psql)
+
+    app.migrations.add(CreateUser())
+
     try routes(app)
 }
