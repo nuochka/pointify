@@ -2,9 +2,8 @@ import SwiftUI
 
 struct LoginView: View {
     
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var isSecure: Bool = true
+    @StateObject private var viewModel = LoginViewModel()
+    @State private var isSecure = true
     
     var body: some View {
         VStack {
@@ -25,10 +24,17 @@ struct LoginView: View {
             Spacer()
             
             VStack(spacing: 20) {
+                if !viewModel.message.isEmpty {
+                    Text(viewModel.message)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 10)
+                }
                 HStack {
+                    
                     Image(systemName: "envelope")
                         .foregroundColor(.gray)
-                    TextField("Email", text: $email)
+                    TextField("Email", text: $viewModel.email)
                         .disableAutocorrection(true)
                 }
                 .padding()
@@ -40,9 +46,9 @@ struct LoginView: View {
                         .foregroundColor(.gray)
                     
                     if isSecure {
-                        SecureField("Password", text: $password)
+                        SecureField("Password", text: $viewModel.password)
                     } else {
-                        TextField("Password", text: $password)
+                        TextField("Password", text: $viewModel.password)
                     }
                     
                     Button(action: {
@@ -68,7 +74,7 @@ struct LoginView: View {
                 
   
                 Button(action: {
-
+                    viewModel.loginUser()
                 }) {
                     Text("Sign In")
                         .fontWeight(.semibold)
@@ -78,6 +84,8 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                
+                
                 
                 HStack{
                     Text("Do not have an account yet?")
