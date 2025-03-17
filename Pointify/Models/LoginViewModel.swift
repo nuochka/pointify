@@ -11,6 +11,7 @@ class LoginViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var message: String = ""
+    @Published var isAuthenticated: Bool = false
 
     func loginUser() {
         guard !email.isEmpty, !password.isEmpty else {
@@ -52,9 +53,9 @@ class LoginViewModel: ObservableObject {
                 }
                 
                 if httpResponse.statusCode == 200 {
-                    self.message = "Login successful"
+                    self.isAuthenticated = true
                 } else {
-                    self.message = "Login failed: \(httpResponse.statusCode)"
+                    self.message = "Invalid email or password."
                 }
             }
         }.resume()
