@@ -24,6 +24,7 @@ public func configure(_ app: Application) async throws {
     app.databases.use(.postgres(configuration: config), as: .psql)
 
     app.migrations.add(CreateUser())
+    app.migrations.add(CreateGoal())
 
     try routes(app)
 }
