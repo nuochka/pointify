@@ -4,12 +4,12 @@ struct LoginView: View {
     
     @StateObject private var viewModel = LoginViewModel()
     @State private var isSecure = true
-    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    @State private var isLoggedIn: Bool = false
     
     var body: some View {
         NavigationStack {
-            if isLoggedIn {
-                MainView()
+            if !isLoggedIn {
+                GoalsView()
             } else {
                 VStack {
                     Spacer()
