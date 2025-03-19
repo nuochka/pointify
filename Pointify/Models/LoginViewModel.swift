@@ -52,13 +52,30 @@ class LoginViewModel: ObservableObject {
                     return
                 }
                 
+                guard let data = data else {
+                    self.message = "No data received"
+                    return
+                }
+
                 if httpResponse.statusCode == 200 {
-                    self.isAuthenticated = true
+                    do {
+                        let responseJSON = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                        if let userId = responseJSON?["id"] as? String {
+                            UserDefaults.standard.set(userId, forKey: "userId")
+                            self.isAuthenticated = true
+                            self.message = "Login successful"
+                        } else {
+                            self.message = "User ID not found in response"
+                        }
+                    } catch {
+                        self.message = "Failed to parse server response"
+                    }
                 } else {
                     self.message = "Invalid email or password."
                 }
             }
         }.resume()
     }
+
 }
 

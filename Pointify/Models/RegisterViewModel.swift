@@ -1,14 +1,6 @@
-//
-//  RegisterViewModel.swift
-//  Pointify
-//
-//  Created by nuochka on 16/03/2025.
-//
-
 import Foundation
 
-
-class RegisterViewModel : ObservableObject {
+class RegisterViewModel: ObservableObject {
     
     @Published var name: String = ""
     @Published var email: String = ""
@@ -16,7 +8,7 @@ class RegisterViewModel : ObservableObject {
     @Published var confirmPassword: String = ""
     @Published var message: String = ""
     
-    func registerUser(){
+    func registerUser() {
         if name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty {
             message = "Please fill in all fields."
             return
@@ -36,6 +28,7 @@ class RegisterViewModel : ObservableObject {
             message = "Password should be at least 6 characters long."
             return
         }
+        
         if !isPasswordStrong(password) {
             message = "Password must contain uppercase letters, lowercase letters, digits, and special characters."
             return
@@ -43,6 +36,7 @@ class RegisterViewModel : ObservableObject {
         
         if password != confirmPassword {
             message = "Passwords do not match."
+            return
         }
         
         guard let url = URL(string: "http://localhost:8080/register") else {
@@ -61,10 +55,11 @@ class RegisterViewModel : ObservableObject {
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: jsonData)
-            } catch {
-                message = "Error encoding data"
-                return
+        } catch {
+            message = "Error encoding data"
+            return
         }
+        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 DispatchQueue.main.async {
@@ -73,9 +68,24 @@ class RegisterViewModel : ObservableObject {
                 return
             }
 
-            if let data = data, let _ = try? JSONSerialization.jsonObject(with: data) {
-                DispatchQueue.main.async {
-                    self.message = "Registration successful!"
+            if let data = data {
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let userIdString = json["user_id"] as? String {
+                        UserDefaults.standard.set(userIdString, forKey: "userId")
+                        
+                        DispatchQueue.main.async {
+                            self.message = "Registration successful!"
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            self.message = "Failed to get user ID from server."
+                        }
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.message = "Error parsing response from server."
+                    }
                 }
             } else {
                 DispatchQueue.main.async {
@@ -91,5 +101,13 @@ class RegisterViewModel : ObservableObject {
             
         let passwordTest = NSPredicate(format: "SELF MATCHES %@", passwordRegEx)
         return passwordTest.evaluate(with: password)
+    }
+
+    func getUserId() -> UUID? {
+        if let userIdString = UserDefaults.standard.string(forKey: "userID"),
+           let userId = UUID(uuidString: userIdString) {
+            return userId
+        }
+        return nil
     }
 }
