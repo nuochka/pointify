@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Foundation
+
 
 @main
 struct PointifyApp: App {
@@ -15,3 +17,18 @@ struct PointifyApp: App {
         }
     }
 }
+
+extension UserDefaults {
+    func saveUserId(_ userId: UUID) {
+        set(userId.uuidString, forKey: "userId")
+    }
+
+    func getUserId() -> UUID? {
+        guard let userIdString = string(forKey: "userId"),
+              let userId = UUID(uuidString: userIdString) else {
+            return nil
+        }
+        return userId
+    }
+}
+
