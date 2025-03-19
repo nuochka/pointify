@@ -34,3 +34,14 @@ final class User: Model, Content {
     }
     
 }
+extension User {
+    struct Public: Content {
+        var id: UUID
+        var email: String
+    }
+
+    func asPublic() throws -> Public {
+        return Public(id: try requireID(), email: self.email)
+    }
+}
+

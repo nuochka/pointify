@@ -15,7 +15,7 @@ struct LoginController: RouteCollection {
     }
     
     @Sendable
-    func login(req: Request) async throws -> HTTPStatus{
+    func login(req: Request) async throws -> User.Public {
         let data = try req.content.decode(LoginRequest.self)
         
         guard data.email.contains("@"), data.password.count >= 6 else {
@@ -32,6 +32,7 @@ struct LoginController: RouteCollection {
         if !isPasswordCorrect {
             throw Abort(.unauthorized, reason: "Invalid email or password.")
         }
-        return .ok
+
+        return try user.asPublic()
     }
 }
