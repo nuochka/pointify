@@ -25,6 +25,7 @@ public func configure(_ app: Application) async throws {
 
     app.migrations.add(CreateUser())
     app.migrations.add(CreateGoal())
+    app.migrations.add(CreateTask())
 
     try routes(app)
 }
