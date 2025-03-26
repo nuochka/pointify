@@ -19,6 +19,16 @@ final class TaskController: RouteCollection {
         tasks.post { req async throws -> Task in
             try await self.create(req: req)
         }
+        tasks.delete(":taskId") { req async throws -> HTTPStatus in
+            guard let taskId = req.parameters.get("taskId", as: UUID.self) else {
+                throw Abort(.badRequest, reason: "Invalid task ID")
+            }
+            guard let task = try await Task.find(taskId, on: req.db) else {
+                throw Abort(.notFound, reason: "Task not found")
+            }
+                try await task.delete(on: req.db)
+                return .ok
+            }
     }
     
     func getAll(req: Request) async throws -> [Task] {

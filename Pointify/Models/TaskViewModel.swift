@@ -69,4 +69,24 @@ final class TaskViewModel: ObservableObject {
             }
         }.resume()
     }
+    
+    func deleteTask(taskId: UUID) {
+        guard let url = URL(string: "\(baseURL)/\(taskId)") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                print("Error deleting goal")
+            }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                print("Server error: \(httpResponse.statusCode)")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.tasks.removeAll { $0.id == taskId }
+            }
+        }.resume()
+    }
 }

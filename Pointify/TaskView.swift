@@ -98,6 +98,12 @@ struct TaskView: View {
                                     Spacer()
                                     Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
                                         .foregroundColor(task.isCompleted ? .green : .gray)
+                                    Button(action: {
+                                        viewModel.deleteTask(taskId: task.id)
+                                    }){
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red)
+                                    }
                                 }
                                 .padding(.vertical, 4)
                             }
