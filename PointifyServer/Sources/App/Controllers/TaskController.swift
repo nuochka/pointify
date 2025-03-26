@@ -29,6 +29,21 @@ final class TaskController: RouteCollection {
                 try await task.delete(on: req.db)
                 return .ok
             }
+        tasks.patch(":taskId") { req async throws -> Task in
+            guard let taskId = req.parameters.get("taskId", as: UUID.self),
+                  let task = try await Task.find(taskId, on: req.db) else {
+                throw Abort(.notFound, reason: "Task not found")
+            }
+            
+            let data = try req.content.decode([String: Bool].self)
+            
+            if let isCompleted = data["isCompleted"] {
+                task.isCompleted = isCompleted
+                try await task.save(on: req.db)
+            }
+            
+            return task
+        }
     }
     
     func getAll(req: Request) async throws -> [Task] {

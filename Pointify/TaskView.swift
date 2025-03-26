@@ -96,8 +96,12 @@ struct TaskView: View {
                                             .foregroundColor(.secondary)
                                     }
                                     Spacer()
-                                    Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(task.isCompleted ? .green : .gray)
+                                    Button(action: {
+                                        viewModel.toggleTaskCompletion(taskId: task.id)
+                                    }) {
+                                        Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(task.isCompleted ? .green : .gray)
+                                    }
                                     Button(action: {
                                         viewModel.deleteTask(taskId: task.id)
                                     }){
