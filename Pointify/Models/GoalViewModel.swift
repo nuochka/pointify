@@ -62,4 +62,24 @@ final class GoalViewModel: ObservableObject {
             }
         }.resume()
     }
+    
+    func deleteGoal(goalId: UUID) {
+        guard let url = URL(string: "\(baseURL)/\(goalId)") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let errror = error {
+                print("Error deleting goal")
+            }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                print("Server error: \(httpResponse.statusCode)")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.goals.removeAll { $0.id == goalId }
+            }
+        }.resume()
+    }
 }

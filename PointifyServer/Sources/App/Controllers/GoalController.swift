@@ -18,6 +18,16 @@ final class GoalController: RouteCollection {
         goals.post { req async throws -> Goal in
             try await self.create(req: req)
         }
+        goals.delete(":goalId") { req async throws -> HTTPStatus in
+            guard let goalId = req.parameters.get("goalId", as: UUID.self) else {
+                throw Abort(.badRequest, reason: "Invalid goal ID")
+            }
+            guard let goal = try await Goal.find(goalId, on: req.db) else {
+                throw Abort(.notFound, reason: "Goal not found")
+            }
+                try await goal.delete(on: req.db)
+                return .ok
+            }
     }
     
     func getAll(req: Request) async throws -> [Goal] {

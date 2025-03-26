@@ -39,9 +39,9 @@ struct GoalsView: View {
 
                 VStack(spacing: 20) {
                     HStack {
-                        Image(systemName: "star.fill")
+                        Image(systemName: "pencil")
                             .foregroundColor(.gray)
-                        TextField("Goal Title", text: $newTitle)
+                        TextField("Goal", text: $newTitle)
                             .disableAutocorrection(true)
                     }
                     .padding()
@@ -49,7 +49,7 @@ struct GoalsView: View {
                     .cornerRadius(12)
                     
                     HStack {
-                        Image(systemName: "point.fill")
+                        Image(systemName: "star")
                             .foregroundColor(.gray)
                         TextField("Points", text: $newPoints)
                             //.keyboardType(.numberPad)
@@ -98,6 +98,12 @@ struct GoalsView: View {
                                     Spacer()
                                     Image(systemName: goal.isCompleted ? "checkmark.circle.fill" : "circle")
                                         .foregroundColor(goal.isCompleted ? .green : .gray)
+                                    Button(action: {
+                                        viewModel.deleteGoal(goalId: goal.id)
+                                    }){
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red)
+                                    }
                                 }
                                 .padding(.vertical, 4)
                             }
