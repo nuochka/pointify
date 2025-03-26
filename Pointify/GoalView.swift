@@ -96,8 +96,13 @@ struct GoalsView: View {
                                             .foregroundColor(.secondary)
                                     }
                                     Spacer()
-                                    Image(systemName: goal.isCompleted ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(goal.isCompleted ? .green : .gray)
+                                    Button(action: {
+                                        viewModel.toggleGoalCompletion(goalId: goal.id)
+                                    }) {
+                                        Image(systemName: goal.isCompleted ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(goal.isCompleted ? .green : .gray)
+                                    }
+
                                     Button(action: {
                                         viewModel.deleteGoal(goalId: goal.id)
                                     }){

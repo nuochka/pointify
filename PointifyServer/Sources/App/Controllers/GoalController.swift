@@ -28,6 +28,21 @@ final class GoalController: RouteCollection {
                 try await goal.delete(on: req.db)
                 return .ok
             }
+        goals.patch(":goalId") { req async throws -> Goal in
+            guard let goalId = req.parameters.get("goalId", as: UUID.self),
+                  let goal = try await Goal.find(goalId, on: req.db) else {
+                throw Abort(.notFound, reason: "Goal not found")
+            }
+            
+            let data = try req.content.decode([String: Bool].self)
+            
+            if let isCompleted = data["isCompleted"] {
+                goal.isCompleted = isCompleted
+                try await goal.save(on: req.db)
+            }
+            
+            return goal
+        }
     }
     
     func getAll(req: Request) async throws -> [Goal] {
