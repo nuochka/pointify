@@ -1,16 +1,33 @@
 import SwiftUI
 
 struct MainView: View {
-    @State private var totalPoints: Int = 0
-    
+    @StateObject private var mainViewModel: MainViewModel
+
+    init() {
+        if let userIdString = UserDefaults.standard.string(forKey: "userId"),
+           let userId = UUID(uuidString: userIdString) {
+            _mainViewModel = StateObject(wrappedValue: MainViewModel(userId: userId))
+        } else {
+            let newId = UUID()
+            UserDefaults.standard.set(newId.uuidString, forKey: "userId")
+            _mainViewModel = StateObject(wrappedValue: MainViewModel(userId: newId))
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 30) {
-                Text("Your Points: \(totalPoints)")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.leading)
-                    .padding(.top, 40)
+                if mainViewModel.isLoading {
+                    ProgressView("Loading...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .padding()
+                } else {
+                    Text("Your Points: \(mainViewModel.totalPoints)")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.leading)
+                        .padding(.top, 40)
+                }
                 
                 HStack(spacing: 20) {
                     NavigationLink(destination: TaskView()) {
@@ -35,7 +52,8 @@ struct MainView: View {
                 }
                 .padding(.horizontal)
 
-                Spacer()            }
+                Spacer()
+            }
             .padding()
         }
     }
