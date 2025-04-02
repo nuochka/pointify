@@ -24,13 +24,17 @@ final class User: Model, Content {
     @Field(key: "password")
     var password: String
     
+    @Field(key: "points")
+    var points: Int
+    
     init() {}
     
-    init(id: UUID? = nil, name: String, email: String, password: String){
+    init(id: UUID? = nil, name: String, email: String, password: String, points: Int = 0){
         self.id = id
         self.name = name
         self.email = email
         self.password = password
+        self.points = points
     }
     
 }

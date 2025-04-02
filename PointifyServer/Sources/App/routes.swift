@@ -14,4 +14,5 @@ func routes(_ app: Application) throws {
     try app.register(collection: LoginController())
     try app.register(collection: GoalController())
     try app.register(collection: TaskController())
+    try app.register(collection: UserController())
 }

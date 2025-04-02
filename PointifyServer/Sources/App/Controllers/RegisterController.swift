@@ -30,7 +30,7 @@ struct RegisterController: RouteCollection {
 
         let passwordHash = try Bcrypt.hash(data.password)
 
-        let user = User(name: data.name, email: data.email, password: passwordHash)
+        let user = User(name: data.name, email: data.email, password: passwordHash, points: 0)
         try await user.save(on: req.db)
 
         return .created
