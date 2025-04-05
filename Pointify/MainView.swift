@@ -2,7 +2,9 @@ import SwiftUI
 
 struct MainView: View {
     @StateObject private var mainViewModel: MainViewModel
-
+    @AppStorage("userId") private var userIdString: String?
+    @State private var isLoggedIn: Bool = true
+    
     init() {
         if let userIdString = UserDefaults.standard.string(forKey: "userId"),
            let userId = UUID(uuidString: userIdString) {
@@ -15,57 +17,74 @@ struct MainView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                VStack(spacing: 25) {
-                    Spacer()
-
+        VStack {
+            if isLoggedIn {
+                NavigationStack {
                     ZStack {
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.gray.opacity(0.1))
-                            .shadow(color: .gray.opacity(0.2), radius: 8, x: 0, y: 5)
+                        VStack(spacing: 25) {
+                            Spacer()
 
-                        VStack {
-                            Text("Your Points")
-                                .font(.headline)
-                                .foregroundColor(.black.opacity(0.6))
-                            
-                            if mainViewModel.isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                                    .tint(.black)
-                            } else {
-                                Text("\(mainViewModel.totalPoints)")
-                                    .font(.system(size: 50, weight: .bold, design: .rounded))
-                                    .foregroundColor(.black)
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.gray.opacity(0.1))
+                                    .shadow(color: .gray.opacity(0.2), radius: 8, x: 0, y: 5)
+
+                                VStack {
+                                    Text("Your Points")
+                                        .font(.headline)
+                                        .foregroundColor(.black.opacity(0.6))
+
+                                    if mainViewModel.isLoading {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle())
+                                            .tint(.black)
+                                    } else {
+                                        Text("\(mainViewModel.totalPoints)")
+                                            .font(.system(size: 50, weight: .bold, design: .rounded))
+                                            .foregroundColor(.black)
+                                    }
+                                }
+                                .padding()
                             }
+                            .frame(width: 250, height: 120)
+
+                            VStack(spacing: 15) {
+                                NavigationLink(destination: TaskView()) {
+                                    CustomButton(title: "Create Task")
+                                }
+
+                                NavigationLink(destination: GoalsView()) {
+                                    CustomButton(title: "Create Goal")
+                                }
+                            }
+                            .padding(.horizontal)
+
+                            Spacer()
                         }
                         .padding()
                     }
-                    .frame(width: 250, height: 120)
-
-                    VStack(spacing: 15) {
-                        NavigationLink(destination: TaskView()) {
-                            CustomButton(title: "Create Task")
-                        }
-                        
-                        NavigationLink(destination: GoalsView()) {
-                            CustomButton(title: "Create Goal")
+                    .navigationTitle("Main")
+                    .toolbar {
+                        Button("Logout") {
+                            logoutUser()
                         }
                     }
-                    .padding(.horizontal)
-
-                    Spacer()
                 }
-                .padding()
+            } else {
+                LoginView()
             }
         }
+    }
+
+    private func logoutUser() {
+        UserDefaults.standard.removeObject(forKey: "userId")
+        userIdString = nil
+        isLoggedIn = false
     }
 }
 
 struct CustomButton: View {
     let title: String
-    
     var body: some View {
         Text(title)
             .font(.headline)

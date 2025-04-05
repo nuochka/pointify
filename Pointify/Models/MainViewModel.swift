@@ -49,4 +49,7 @@ class MainViewModel: ObservableObject {
             }
         }.resume()
     }
+    func logout() {
+        UserDefaults.standard.removeObject(forKey: "userId")
+    }
 }

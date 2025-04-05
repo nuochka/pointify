@@ -4,12 +4,15 @@ struct LoginView: View {
     
     @StateObject private var viewModel = LoginViewModel()
     @State private var isSecure = true
+    @AppStorage("userId") private var userIdString: String? // This will automatically observe changes
+    
     @State private var isLoggedIn: Bool = false
     
     var body: some View {
         NavigationStack {
-            if !isLoggedIn {
-                GoalsView()
+
+            if userIdString != nil {
+                MainView()
             } else {
                 VStack {
                     Spacer()
@@ -101,11 +104,6 @@ struct LoginView: View {
                         .padding(.top, 10)
                     }
                     .padding(.horizontal)
-                    .onReceive(viewModel.$isAuthenticated) { isAuth in
-                        if isAuth {
-                            isLoggedIn = true
-                        }
-                    }
                     
                     Spacer()
                 }
