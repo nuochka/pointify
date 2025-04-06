@@ -8,6 +8,7 @@ final class GoalViewModel: ObservableObject {
     
     init(userId: UUID) {
         self.userId = userId
+        fetchGoals()
     }
     
     func fetchGoals() {

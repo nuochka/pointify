@@ -15,6 +15,7 @@ final class TaskViewModel: ObservableObject {
     
     init(userId: UUID) {
         self.userId = userId
+        fetchTasks()
     }
     
     func fetchTasks() {
