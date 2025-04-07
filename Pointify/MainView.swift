@@ -33,16 +33,9 @@ struct MainView: View {
                                     Text("Your Points")
                                         .font(.headline)
                                         .foregroundColor(.black.opacity(0.6))
-
-                                    if mainViewModel.isLoading {
-                                        ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle())
-                                            .tint(.black)
-                                    } else {
-                                        Text("\(mainViewModel.totalPoints)")
-                                            .font(.system(size: 50, weight: .bold, design: .rounded))
-                                            .foregroundColor(.black)
-                                    }
+                                    Text("\(mainViewModel.totalPoints)")
+                                        .font(.system(size: 50, weight: .bold, design: .rounded))
+                                        .foregroundColor(.black)
                                 }
                                 .padding()
                             }
@@ -63,7 +56,6 @@ struct MainView: View {
                         }
                         .padding()
                     }
-                    .navigationTitle("Main")
                     .toolbar {
                         Button("Logout") {
                             logoutUser()
