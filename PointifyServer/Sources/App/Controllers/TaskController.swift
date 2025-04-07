@@ -1,10 +1,3 @@
-//
-//  TaskController.swift
-//  PointifyServer
-//
-//  Created by nuochka on 23/03/2025.
-//
-
 import Vapor
 import Fluent
 
@@ -26,9 +19,18 @@ final class TaskController: RouteCollection {
             guard let task = try await Task.find(taskId, on: req.db) else {
                 throw Abort(.notFound, reason: "Task not found")
             }
-                try await task.delete(on: req.db)
-                return .ok
+
+            if task.isCompleted {
+                if let user = try await User.find(task.userId, on: req.db) {
+                    user.points -= task.points
+                    try await user.save(on: req.db)
+                }
             }
+            
+            try await task.delete(on: req.db)
+            return .ok
+        }
+
         tasks.patch(":taskId") { req async throws -> Task in
             guard let taskId = req.parameters.get("taskId", as: UUID.self),
                   let task = try await Task.find(taskId, on: req.db) else {
@@ -38,8 +40,26 @@ final class TaskController: RouteCollection {
             let data = try req.content.decode([String: Bool].self)
             
             if let isCompleted = data["isCompleted"] {
-                task.isCompleted = isCompleted
-                try await task.save(on: req.db)
+                if isCompleted && !task.isCompleted {
+                    task.isCompleted = true
+                    try await task.save(on: req.db)
+                    
+                    if let user = try await User.find(task.userId, on: req.db) {
+                        user.points += task.points
+                        try await user.save(on: req.db)
+                    }
+                } else if !isCompleted && task.isCompleted {
+                    task.isCompleted = false
+                    try await task.save(on: req.db)
+                    
+                    if let user = try await User.find(task.userId, on: req.db) {
+                        user.points -= task.points
+                        try await user.save(on: req.db)
+                    }
+                } else {
+                    task.isCompleted = isCompleted
+                    try await task.save(on: req.db)
+                }
             }
             
             return task
@@ -54,8 +74,9 @@ final class TaskController: RouteCollection {
         let data = try req.content.decode([String: String].self)
             
         guard let userIdString = data["user_id"],
-            let userId = UUID(uuidString: userIdString) else {
-            throw Abort(.badRequest, reason: "Invalid user_id format")
+              let userId = UUID(uuidString: userIdString),
+              let user = try await User.find(userId, on: req.db) else {
+            throw Abort(.badRequest, reason: "Invalid user_id or user not found")
         }
 
         let title = data["title"] ?? ""
@@ -64,7 +85,12 @@ final class TaskController: RouteCollection {
 
         let task = Task(title: title, isCompleted: isCompleted, points: points, userId: userId)
         try await task.save(on: req.db)
-
+        
+        if isCompleted {
+            user.points += points
+            try await user.save(on: req.db)
+        }
+        
         return task
     }
 }
