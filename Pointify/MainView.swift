@@ -55,6 +55,9 @@ struct MainView: View {
                             Spacer()
                         }
                         .padding()
+                        .onAppear {
+                            mainViewModel.fetchUserPoints()
+                        }
                     }
                     .toolbar {
                         Button("Logout") {
