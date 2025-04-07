@@ -124,7 +124,5 @@ struct TaskView: View {
 }
 
 #Preview {
-    NavigationStack {
-        TaskView()
-    }
+    TaskView()
 }

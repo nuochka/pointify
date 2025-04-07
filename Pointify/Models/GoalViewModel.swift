@@ -2,13 +2,16 @@ import Foundation
 
 final class GoalViewModel: ObservableObject {
     @Published var goals: [Goal] = []
+    @Published var totalPoints: Int = 0
     
     private let baseURL = "http://localhost:8080/goals"
     private let userId: UUID
+    private let pointsURL = "http://localhost:8080/users"
     
     init(userId: UUID) {
         self.userId = userId
         fetchGoals()
+        fetchTotalPoints()
     }
     
     func fetchGoals() {
@@ -25,13 +28,23 @@ final class GoalViewModel: ObservableObject {
         }.resume()
     }
     
+    func fetchTotalPoints() {
+        guard let url = URL(string: "\(pointsURL)/\(userId)/points") else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            if let data = data {
+                if let decoded = try? JSONDecoder().decode(UserPointsResponse.self, from: data) {
+                    DispatchQueue.main.async {
+                        self.totalPoints = decoded.totalPoints
+                    }
+                }
+            }
+        }.resume()
+    }
+    
     func addGoal(title: String, points: Int, isCompleted: Bool) {
         guard let url = URL(string: baseURL) else { return }
         
-        guard let userIdString = UserDefaults.standard.string(forKey: "userId") else {
-            print("User is not logged in.")
-            return
-        }
         let isCompletedString = isCompleted ? "true" : "false"
         let pointsString = String(points)
         
@@ -39,7 +52,7 @@ final class GoalViewModel: ObservableObject {
             "title": title,
             "isCompleted": isCompletedString,
             "points": pointsString,
-            "user_id": userIdString
+            "user_id": userId.uuidString
         ]
         
         var request = URLRequest(url: url)
@@ -65,6 +78,10 @@ final class GoalViewModel: ObservableObject {
     }
     
     func deleteGoal(goalId: UUID) {
+        guard let goal = goals.first(where: { $0.id == goalId }) else { return }
+        
+        let goals = goal.points
+        
         guard let url = URL(string: "\(baseURL)/\(goalId)") else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
@@ -88,6 +105,14 @@ final class GoalViewModel: ObservableObject {
         guard let index = goals.firstIndex(where: { $0.id == goalId }) else { return }
         
         let newStatus = !goals[index].isCompleted
+        let points = goals[index].points
+        
+        if newStatus {
+            self.totalPoints -= points
+        } else {
+            self.totalPoints += points
+        }
+        
         guard let url = URL(string: "\(baseURL)/\(goalId)") else { return }
         
         var request = URLRequest(url: url)
@@ -102,10 +127,13 @@ final class GoalViewModel: ObservableObject {
                 print("Error updating goal: \(error.localizedDescription)")
                 return
             }
-            
+            DispatchQueue.main.async {
+                self.goals[index].isCompleted = newStatus
+            }
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 DispatchQueue.main.async {
                     self.goals[index].isCompleted = newStatus
+                    self.fetchTotalPoints()
                 }
             }
         }.resume()
