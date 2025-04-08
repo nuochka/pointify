@@ -15,7 +15,7 @@ struct RegisterController: RouteCollection {
     }
 
     @Sendable
-    func register(req: Request) async throws -> HTTPStatus {
+    func register(req: Request) async throws -> Response {
         let data = try req.content.decode(RegisterRequest.self)
         
         guard data.name.count > 1,
@@ -33,7 +33,12 @@ struct RegisterController: RouteCollection {
         let user = User(name: data.name, email: data.email, password: passwordHash, points: 0)
         try await user.save(on: req.db)
 
-        return .created
+        struct RegisterResponse: Content {
+                let email: String
+            }
+
+        let response = RegisterResponse(email: user.email)
+        return try Response(status: .created, body: .init(data: JSONEncoder().encode(response)))
     }
 }
 

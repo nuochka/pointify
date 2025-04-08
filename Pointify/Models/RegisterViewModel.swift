@@ -71,15 +71,15 @@ class RegisterViewModel: ObservableObject {
             if let data = data {
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let userIdString = json["user_id"] as? String {
-                        UserDefaults.standard.set(userIdString, forKey: "userId")
+                       let emailResponse = json["email"] as? String {
+                        UserDefaults.standard.set(emailResponse, forKey: "email")
                         
                         DispatchQueue.main.async {
                             self.message = "Registration successful!"
                         }
                     } else {
                         DispatchQueue.main.async {
-                            self.message = "Failed to get user ID from server."
+                            self.message = "Failed to get email from server."
                         }
                     }
                 } catch {
@@ -104,9 +104,8 @@ class RegisterViewModel: ObservableObject {
     }
 
     func getUserId() -> UUID? {
-        if let userIdString = UserDefaults.standard.string(forKey: "userID"),
-           let userId = UUID(uuidString: userIdString) {
-            return userId
+        if let emailString = UserDefaults.standard.string(forKey: "email") {
+            return UUID(uuidString: emailString)
         }
         return nil
     }
